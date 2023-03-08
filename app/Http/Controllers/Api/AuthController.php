@@ -23,14 +23,6 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
 
-            if ($data->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $data->errors()
-                ], 401);
-            }
-
             $user = User::create([
                 "name" => $request->name,
                 "email" => $request->email,
@@ -67,19 +59,11 @@ class AuthController extends Controller
         try {
             $credentials = $request->validated();
 
-            if ($credentials->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'validation error',
-                    'errors' => $credentials->errors()
-                ], 401);
-            }
-
             if (!Auth::attempt($credentials)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Email & Password does not match with our record.',
-                ], 401);
+                    'errors' => 'Provided email address or password is incorrect',
+                ], 422);
             }
 
             $user = User::where('email', $request->email)->first();
@@ -99,7 +83,7 @@ class AuthController extends Controller
         } catch (\Exception $exception) {
             return response()->json([
                 'status' => false,
-                'message' => $exception->getMessage()
+                'message' => '$exception->getMessage()'
             ], 500);
         }
     }
