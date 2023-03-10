@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Http\Controllers\FetchNewsController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -9,10 +10,18 @@ class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
+     * 
+     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      */
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+
+        $schedule->call(function() {
+            (new FetchNewsController())->getFromNewsAPI();
+            (new FetchNewsController())->getFromGuardian();
+            (new FetchNewsController())->getFromNyTimes();
+        })->everyMinute();
     }
 
     /**
