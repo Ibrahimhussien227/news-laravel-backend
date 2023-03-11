@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PreferencesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,9 +25,11 @@ use Illuminate\Support\Facades\Route;
 
 // });
 
-Route::get('/getArticles', [ArticleController::class, 'getArticles']);
-Route::get('/getAuthors', [ArticleController::class, 'getAuthors']);
-Route::get('/getSources', [ArticleController::class, 'getSources']);
+Route::middleware("auth.if.has.token")->group(function() {
+    Route::get('/getArticles', [ArticleController::class, 'getArticles']);
+    Route::get('/getAuthors', [ArticleController::class, 'getAuthors']);
+    Route::get('/getSources', [ArticleController::class, 'getSources']);
+});
 
 
 Route::middleware("auth:sanctum")->group(function() {
@@ -36,8 +39,8 @@ Route::middleware("auth:sanctum")->group(function() {
 
     Route::post("/logout", [AuthController::class, "logout"]);
 
-    // Route::get('/preferences', [PreferencesController::class, 'getPreferencesPageResources']);
-    // Route::post('/preferences', [PreferencesController::class, 'savePreferences']);
+    Route::get('/preferences', [PreferencesController::class, 'getPreferencesPageResources']);
+    Route::post('/preferences', [PreferencesController::class, 'savePreferences']);
 });
 
 Route::post("/signup", [AuthController::class, "signup"]);

@@ -24,25 +24,25 @@ class ArticleController extends Controller
                 ->orWhere('description', 'LIKE', "%{$search}%");
         }
 
-        // if ( Auth::check() ) {
-        //     $preference = json_decode($request->user()->preference, true);
-        //     $preferred_authors = (array) Arr::get($preference, 'authors');
-        //     $preferred_source = (array) Arr::get($preference, 'sources');
+        if ( Auth::check() ) {
+            $preference = json_decode($request->user()->preference, true);
+            $preferred_authors = (array) Arr::get($preference, 'authors');
+            $preferred_source = (array) Arr::get($preference, 'sources');
 
-        //     /**
-        //      * Get news from preferred authors and sources
-        //      */
-        //     if ( count($preferred_authors) || count( $preferred_source ) ) {
-        //         $articles = $articles->where(function ($query) use ($preferred_authors, $preferred_source) {
-        //             $query->whereHas('author', function ($query) use ($preferred_authors) {
-        //                 $query->whereIn('authors.id', $preferred_authors);
-        //             })->orWhereHas('source', function ($query) use ($preferred_source) {
-        //                 $query->whereIn('sources.id', $preferred_source);
-        //             });
-        //         });
-        //     }
+            /**
+             * Get news from preferred authors and sources
+             */
+            if ( count($preferred_authors) || count( $preferred_source ) ) {
+                $articles = $articles->where(function ($query) use ($preferred_authors, $preferred_source) {
+                    $query->whereHas('author', function ($query) use ($preferred_authors) {
+                        $query->whereIn('authors.id', $preferred_authors);
+                    })->orWhereHas('source', function ($query) use ($preferred_source) {
+                        $query->whereIn('sources.id', $preferred_source);
+                    });
+                });
+            }
 
-        // }
+        } 
 
         if ( count( $authors ) ) {
             $articles = $articles->whereHas('author', function ($query) use ($authors) {
@@ -58,7 +58,7 @@ class ArticleController extends Controller
 
 
         $results = $articles->with('source')->orderBy('published_at', 'desc')
-            ->paginate(10, ['*'], 'page');
+            ->paginate(12, ['*'], 'page');
 
         return response()->json([
             'status' => true,
@@ -68,13 +68,13 @@ class ArticleController extends Controller
 
     public function getAuthors( Request $request ){
         $authors = Author::query();
-        // if ( $request->user() ) {
-        //     $author_ids = $request->user()->preferred_author_ids;
+        if ( $request->user() ) {
+            $author_ids = $request->user()->preferred_author_ids;
 
-        //     if ( is_array( $author_ids ) && count($author_ids) ) {
-        //         $authors = $authors->whereIn('id', $author_ids);
-        //     }
-        // }
+            if ( is_array( $author_ids ) && count($author_ids) ) {
+                $authors = $authors->whereIn('id', $author_ids);
+            }
+        }
         if ( ! empty( $request->search ) ) {
             $authors = $authors->where( 'author_name', 'LIKE', "%{$request->search}%" );
         }
@@ -89,13 +89,13 @@ class ArticleController extends Controller
 
     public function getSources( Request $request ){
         $sources = Source::query();
-        // if ( $request->user() ) {
-        //     $source_ids = $request->user()->preferred_source_ids;
+        if ( $request->user() ) {
+            $source_ids = $request->user()->preferred_source_ids;
 
-        //     if ( is_array( $source_ids ) && count($source_ids) ) {
-        //         $sources = $sources->whereIn('id', $source_ids);
-        //     }
-        // }
+            if ( is_array( $source_ids ) && count($source_ids) ) {
+                $sources = $sources->whereIn('id', $source_ids);
+            }
+        }
         if ( ! empty( $request->search ) ) {
             $sources = $sources->where( 'source', 'LIKE', "%{$request->search}%" );
         }
